@@ -4,12 +4,19 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
+import { solicitudOTPDto } from './dto/solicitarOTP.dto';
+import { randomInt } from 'node:crypto';
+import { RestablecerPasswordOtpDto } from './dto/restablecer-password-otp.dto';
+
+const MAX_OTP_ATTEMPTS = 5;
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly usuariosService: UsuariosService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly mailService: MailService
     ) { }
 
     async register(registerDto: RegisterDto) {
@@ -64,5 +71,70 @@ export class AuthService {
             message: "Inicio de Sesion exitoso",
             access_token: token,
         }
+    }
+
+    async solicitarOTP(solicitarOTPDto: solicitudOTPDto) {
+        const usuario = await this.usuariosService.findByEmail(solicitarOTPDto.email);
+
+        if (!usuario) {
+            return {
+                message: 'Si el correo está registrado, recibirás un código OTP.',
+            };
+        }
+
+        const otpCode = randomInt(100000, 1000000).toString();
+        const otpCodeHash = await bcrypt.hash(otpCode, 10);
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        await this.usuariosService.saveOtpCode(usuario.id, otpCodeHash, otpExpiresAt);
+        await this.mailService.sentOtpEmail(usuario.email, otpCode);
+
+        return {
+            message: 'Si el correo está registrado, recibirás un código OTP.',
+        };
+    }
+
+    async restablecerPasswordConOTP(dto: RestablecerPasswordOtpDto) {
+        const now = new Date();
+        const usuario = await this.usuariosService.findByEmail(dto.email);
+
+        if (
+            !usuario ||
+            !usuario.otpCode ||
+            !usuario.otpExpiresAt ||
+            usuario.otpExpiresAt <= now ||
+            usuario.otpAttempts >= MAX_OTP_ATTEMPTS
+        ) {
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        const otpMatches = await bcrypt.compare(dto.codigoOtp, usuario.otpCode);
+
+        if (!otpMatches) {
+            await this.usuariosService.incrementOtpAttempts(
+                usuario.id,
+                usuario.otpCode,
+                now,
+                MAX_OTP_ATTEMPTS
+            );
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        const hashedPassword = await bcrypt.hash(dto.nuevaPassword, 10);
+        const otpValido = await this.usuariosService.updatePasswordWithOtp(
+            dto.email,
+            usuario.otpCode,
+            hashedPassword,
+            now,
+            MAX_OTP_ATTEMPTS
+        );
+
+        if (!otpValido) {
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        return {
+            message: 'La contraseña fue actualizada exitosamente',
+        };
     }
 }

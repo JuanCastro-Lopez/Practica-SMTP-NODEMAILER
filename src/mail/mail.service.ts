@@ -13,7 +13,7 @@ export class MailService {
 	private readonly otpTemplate: TemplateDelegate<{ otpCode: string }>;
 
 	constructor(
-		@Inject(MAIL_TRANSPORTER) private readonly transporter: Transporter,
+		@Inject(MAIL_TRANSPORTER) private readonly transporter: Transporter | null,
 		private readonly configService: ConfigService,
 	) {
 		const templatePath = join(__dirname, 'templates', 'otp.hbs');
@@ -23,6 +23,23 @@ export class MailService {
 	}
 
 	async sentOtpEmail(email: string, otpCode: string): Promise<void> {
+		if (this.configService.get<string>('MAIL_MODE', 'smtp') === 'simulation') {
+			if (this.configService.get<string>('NODE_ENV') !== 'development') {
+				throw new Error(
+					'No se permite simular el envío OTP fuera de development.',
+				);
+			}
+
+			this.logger.warn(
+				`[OTP SIMULADO] Destinatario: ${email} | Código: ${otpCode}`,
+			);
+			return;
+		}
+
+		if (!this.transporter) {
+			throw new Error('El transporte SMTP no está configurado.');
+		}
+
 		const html = this.otpTemplate({ otpCode });
 
 		try {

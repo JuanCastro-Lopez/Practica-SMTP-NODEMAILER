@@ -10,6 +10,22 @@ import { MAIL_TRANSPORTER, MailService } from './mail.service';
       provide: MAIL_TRANSPORTER,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const mode = configService.get<string>('MAIL_MODE', 'smtp');
+
+        if (mode === 'simulation') {
+          if (configService.get<string>('NODE_ENV') !== 'development') {
+            throw new Error(
+              'MAIL_MODE=simulation solo está permitido en entorno development.',
+            );
+          }
+
+          return null;
+        }
+
+        if (mode !== 'smtp') {
+          throw new Error('MAIL_MODE debe ser simulation o smtp.');
+        }
+
         const port = Number(configService.getOrThrow<string>('MAIL_PORT'));
 
         if (![465, 587].includes(port)) {

@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UsuarioEntity } from './entities/usuario.entity';
-import { Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RolService } from 'src/rol/rol.service';
 
@@ -69,7 +69,8 @@ export class UsuariosService {
     async saveOtpCode(userId: number, otpCode: string, otpExpiresAt: Date): Promise<void> {
         await this.usuariosRepository.update(userId, { 
             otpCode, 
-            otpExpiresAt 
+            otpExpiresAt,
+            otpAttempts: 0,
         });
     }
 
@@ -77,7 +78,52 @@ export class UsuariosService {
     async clearOtpCode(userId: number): Promise<void> {
         await this.usuariosRepository.update(userId, {
             otpCode: null,
-            otpExpiresAt: null
+            otpExpiresAt: null,
+            otpAttempts: 0,
         });
+    }
+
+    async incrementOtpAttempts(
+        userId: number,
+        otpCodeHash: string,
+        now: Date,
+        maxAttempts: number
+    ): Promise<boolean> {
+        const result = await this.usuariosRepository
+            .createQueryBuilder()
+            .update(UsuarioEntity)
+            .set({ otpAttempts: () => 'otpAttempts + 1' })
+            .where('id = :userId', { userId })
+            .andWhere('otpCode = :otpCodeHash', { otpCodeHash })
+            .andWhere('otpExpiresAt > :now', { now })
+            .andWhere('otpAttempts < :maxAttempts', { maxAttempts })
+            .execute();
+
+        return (result.affected ?? 0) > 0;
+    }
+
+    async updatePasswordWithOtp(
+        email: string,
+        otpCodeHash: string,
+        password: string,
+        now: Date,
+        maxAttempts: number
+    ): Promise<boolean> {
+        const result = await this.usuariosRepository.update(
+            {
+                email,
+                otpCode: otpCodeHash,
+                otpExpiresAt: MoreThan(now),
+                otpAttempts: LessThan(maxAttempts),
+            },
+            {
+                password,
+                otpCode: null,
+                otpExpiresAt: null,
+                otpAttempts: 0,
+            }
+        );
+
+        return (result.affected ?? 0) > 0;
     }
 }
