@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -21,10 +22,11 @@ export class LoginDto {
     example: 'secreto123',
     format: 'password',
     writeOnly: true,
-    minLength: 1,
+    minLength: 6,
     required: true,
   })
   @IsNotEmpty({ message: 'La contraseña es obligatoria' })
   @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password!: string;
 }

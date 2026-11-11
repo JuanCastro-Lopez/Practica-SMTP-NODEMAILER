@@ -8,6 +8,7 @@ import { MailService } from 'src/mail/mail.service';
 import { solicitudOTPDto } from './dto/solicitarOTP.dto';
 import { randomInt } from 'node:crypto';
 import { RestablecerPasswordOtpDto } from './dto/restablecer-password-otp.dto';
+import { LoginOtpDto } from './dto/login-otp.dto';
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -71,6 +72,57 @@ export class AuthService {
             message: "Inicio de Sesion exitoso",
             access_token: token,
         }
+    }
+
+    async loginConOtp(loginOtpDto: LoginOtpDto) {
+        const now = new Date();
+        const usuario = await this.usuariosService.findByEmail(loginOtpDto.email);
+
+        if (
+            !usuario ||
+            !usuario.activo ||
+            !usuario.otpCode ||
+            !usuario.otpExpiresAt ||
+            usuario.otpExpiresAt <= now ||
+            usuario.otpAttempts >= MAX_OTP_ATTEMPTS
+        ) {
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        const otpMatches = await bcrypt.compare(loginOtpDto.codigoOtp, usuario.otpCode);
+
+        if (!otpMatches) {
+            await this.usuariosService.incrementOtpAttempts(
+                usuario.id,
+                usuario.otpCode,
+                now,
+                MAX_OTP_ATTEMPTS
+            );
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        const otpConsumed = await this.usuariosService.consumeOtpCode(
+            usuario.id,
+            usuario.otpCode,
+            now,
+            MAX_OTP_ATTEMPTS
+        );
+
+        if (!otpConsumed) {
+            throw new UnauthorizedException('El código OTP es inválido o ha expirado');
+        }
+
+        const payload = {
+            sub: usuario.id,
+            email: usuario.email,
+            rol: usuario.rol?.nombre
+        };
+        const token = await this.jwtService.signAsync(payload);
+
+        return {
+            message: 'Inicio de sesión exitoso',
+            access_token: token,
+        };
     }
 
     async solicitarOTP(solicitarOTPDto: solicitudOTPDto) {

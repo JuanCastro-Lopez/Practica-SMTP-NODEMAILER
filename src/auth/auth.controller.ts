@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -11,6 +12,7 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginOtpDto } from './dto/login-otp.dto';
 import { solicitudOTPDto } from './dto/solicitarOTP.dto';
 import { RestablecerPasswordOtpDto } from './dto/restablecer-password-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -56,11 +58,45 @@ export class AuthController {
     return this.authService.restablecerPasswordConOTP(restablecerPasswordDto);
   }
 
-    @Post('login')
-    @HttpCode(HttpStatus.OK)
-    login(@Body() loginDto: LoginDto){
-        return this.authService.login(loginDto)
-    }
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({
+    description: 'Inicio de sesión exitoso.',
+    schema: {
+      example: {
+        message: 'Inicio de Sesion exitoso',
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'El correo o la contraseña no son válidos.' })
+  @ApiUnauthorizedResponse({ description: 'Credenciales inválidas o cuenta inactiva.' })
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+
+  @Post('login-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión con código OTP' })
+  @ApiBody({ type: LoginOtpDto })
+  @ApiOkResponse({
+    description: 'Inicio de sesión exitoso.',
+    schema: {
+      example: {
+        message: 'Inicio de sesión exitoso',
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'El correo o el código OTP no son válidos.' })
+  @ApiUnauthorizedResponse({
+    description: 'El código OTP es inválido, ha expirado o la cuenta no está activa.',
+  })
+  loginConOtp(@Body() loginOtpDto: LoginOtpDto) {
+    return this.authService.loginConOtp(loginOtpDto);
+  }
 
     //auth/perfil
     @Get('perfil')

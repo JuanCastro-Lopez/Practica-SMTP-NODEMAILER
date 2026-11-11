@@ -83,6 +83,29 @@ export class UsuariosService {
         });
     }
 
+    async consumeOtpCode(
+        userId: number,
+        otpCodeHash: string,
+        now: Date,
+        maxAttempts: number
+    ): Promise<boolean> {
+        const result = await this.usuariosRepository.update(
+            {
+                id: userId,
+                otpCode: otpCodeHash,
+                otpExpiresAt: MoreThan(now),
+                otpAttempts: LessThan(maxAttempts),
+            },
+            {
+                otpCode: null,
+                otpExpiresAt: null,
+                otpAttempts: 0,
+            }
+        );
+
+        return (result.affected ?? 0) > 0;
+    }
+
     async incrementOtpAttempts(
         userId: number,
         otpCodeHash: string,

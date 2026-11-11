@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class LoginOtpDto {
     @ApiProperty({
@@ -15,8 +15,9 @@ export class LoginOtpDto {
         description: "Código OTP recibido para iniciar sesión",
         example: "123456",
         type: String,
+        pattern: "^\\d{6}$",
     })
     @IsString({ message: "El código OTP debe ser una cadena de texto" })
-    @IsNotEmpty({ message: "El código OTP es obligatorio" })
+    @Matches(/^\d{6}$/, { message: "El código OTP debe tener 6 dígitos" })
     codigoOtp!: string;
 }
