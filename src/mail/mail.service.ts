@@ -7,17 +7,22 @@ import type { Transporter } from 'nodemailer';
 
 export const MAIL_TRANSPORTER = 'MAIL_TRANSPORTER';
 
+interface OtpTemplateContext {
+	otpCode: string;
+	imageUrl?: string;
+}
+
 @Injectable()
 export class MailService {
 	private readonly logger = new Logger(MailService.name);
-	private readonly otpTemplate: TemplateDelegate<{ otpCode: string }>;
+	private readonly otpTemplate: TemplateDelegate<OtpTemplateContext>;
 
 	constructor(
 		@Inject(MAIL_TRANSPORTER) private readonly transporter: Transporter | null,
 		private readonly configService: ConfigService,
 	) {
 		const templatePath = join(__dirname, 'templates', 'otp.hbs');
-		this.otpTemplate = compile<{ otpCode: string }>(
+		this.otpTemplate = compile<OtpTemplateContext>(
 			readFileSync(templatePath, 'utf8'),
 		);
 	}
@@ -40,7 +45,22 @@ export class MailService {
 			throw new Error('El transporte SMTP no está configurado.');
 		}
 
-		const html = this.otpTemplate({ otpCode });
+		const imageUrl = this.configService.get<string>('MAIL_IMAGE_URL')?.trim();
+
+		if (imageUrl) {
+			let parsedImageUrl: URL;
+			try {
+				parsedImageUrl = new URL(imageUrl);
+			} catch {
+				throw new Error('MAIL_IMAGE_URL debe ser una URL HTTPS válida.');
+			}
+
+			if (parsedImageUrl.protocol !== 'https:') {
+				throw new Error('MAIL_IMAGE_URL debe usar HTTPS.');
+			}
+		}
+
+		const html = this.otpTemplate({ otpCode, imageUrl });
 
 		try {
 			const result = await this.transporter.sendMail({

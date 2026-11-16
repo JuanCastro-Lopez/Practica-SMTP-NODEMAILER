@@ -5,41 +5,57 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="color-scheme" content="light">
 		<meta name="supported-color-schemes" content="light">
-		<title>Código de inicio de sesión</title>
+		<title>Tu código de acceso</title>
 	</head>
-	<body style="margin: 0; padding: 0; background-color: #f4f6f5; color: #202824; font-family: Arial, Helvetica, sans-serif;">
+	<body style="margin: 0; padding: 0; background-color: #f1f3f9; color: #172033; font-family: Arial, Helvetica, sans-serif;">
 		<div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">
-			Tu código temporal para iniciar sesión.
+			Tu código de acceso ya está listo. Es válido durante 10 minutos.
 		</div>
-		<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f6f5;">
+		<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f3f9;">
 			<tr>
-				<td align="center" style="padding: 40px 16px;">
-					<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 480px; background-color: #ffffff; border: 1px solid #e3e8e5;">
+				<td align="center" style="padding: 36px 14px;">
+					<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 520px; overflow: hidden; background-color: #ffffff; border: 1px solid #e4e8f1; border-radius: 20px;">
 						<tr>
-							<td style="padding: 32px 32px 8px;">
-								<p style="margin: 0 0 8px; color: #47745b; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Seguridad de la cuenta</p>
-								<h1 style="margin: 0; color: #202824; font-size: 24px; line-height: 1.3; font-weight: 600;">Inicia sesión</h1>
+							<td style="padding: 30px 34px 26px; background-color: #171d3b; background-image: linear-gradient(135deg, #171d3b 0%, #382a70 100%);">
+								<p style="margin: 0 0 14px; color: #c9c4ff; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Acceso seguro</p>
+								<h1 style="margin: 0; color: #ffffff; font-size: 27px; line-height: 1.25; font-weight: 700;">Un código y estás dentro.</h1>
+								<p style="margin: 10px 0 0; color: #d7d9ec; font-size: 15px; line-height: 1.6;">Usa este código para continuar con tu inicio de sesión.</p>
+							</td>
+						</tr>
+						{{#if imageUrl}}
+						<tr>
+							<td style="padding: 22px 26px 0;">
+								<img src="{{imageUrl}}" alt="Imagen de tu tienda" width="468" style="display: block; width: 100%; max-width: 468px; height: auto; border: 0; border-radius: 12px;">
+							</td>
+						</tr>
+						{{/if}}
+						<tr>
+							<td align="center" style="padding: 30px 24px 12px;">
+								<p style="margin: 0 0 14px; color: #69738a; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">Tu código de verificación</p>
+								<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="background-color: #f2f0ff; border: 1px solid #dfdbff; border-radius: 14px;">
+									<tr>
+										<td align="center" style="padding: 17px 25px; color: #302568; font-size: 34px; line-height: 1; font-weight: 700; letter-spacing: 9px;">
+											{{otpCode}}
+										</td>
+									</tr>
+								</table>
+								<p style="margin: 16px 0 0; color: #7a8295; font-size: 13px; line-height: 1.5;">Este código vence en <strong style="color: #424b61;">10 minutos</strong>.</p>
 							</td>
 						</tr>
 						<tr>
-							<td style="padding: 8px 32px 24px;">
-								<p style="margin: 0; color: #53615a; font-size: 15px; line-height: 1.6;">Usa este código temporal para completar el inicio de sesión:</p>
-							</td>
-						</tr>
-						<tr>
-							<td align="center" style="padding: 0 32px 24px;">
-								<p style="display: inline-block; margin: 0; padding: 16px 24px; border: 1px solid #dce5df; background-color: #f7faf8; color: #202824; font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: 8px;">
-									{{otpCode}}
-								</p>
-							</td>
-						</tr>
-						<tr>
-							<td style="padding: 0 32px 32px;">
-								<p style="margin: 0 0 12px; color: #53615a; font-size: 14px; line-height: 1.6;">No compartas este código con nadie. El equipo de soporte nunca te lo solicitará.</p>
-								<p style="margin: 0; color: #748078; font-size: 13px; line-height: 1.6;">Si no solicitaste este inicio de sesión, puedes ignorar este correo.</p>
+							<td style="padding: 18px 34px 30px;">
+								<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #fff8e9; border-radius: 10px;">
+									<tr>
+										<td style="padding: 14px 16px; color: #765a24; font-size: 13px; line-height: 1.6;">
+											<strong>Consejo de seguridad:</strong> no compartas este código. El equipo de soporte nunca te lo pedirá.
+										</td>
+									</tr>
+								</table>
+								<p style="margin: 18px 0 0; color: #8a91a1; font-size: 12px; line-height: 1.6; text-align: center;">Si no solicitaste este código, puedes ignorar este mensaje.</p>
 							</td>
 						</tr>
 					</table>
+					<p style="margin: 18px 0 0; color: #9aa1af; font-size: 11px; line-height: 1.5; text-align: center;">Mensaje automático de seguridad. Por favor, no respondas a este correo.</p>
 				</td>
 			</tr>
 		</table>
