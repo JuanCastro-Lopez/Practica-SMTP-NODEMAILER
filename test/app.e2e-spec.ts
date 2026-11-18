@@ -2,28 +2,58 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { CategoriasService } from '../src/categorias/categorias.service';
+import { Producto } from '../src/productos/entities/producto.entity';
+import { ProductosController } from '../src/productos/productos.controller';
+import { ProductosService } from '../src/productos/productos.service';
 
-describe('AppController (e2e)', () => {
+describe('Productos (e2e)', () => {
   let app: INestApplication<App>;
+  const productos = [
+    {
+      id: 1,
+      nombre: 'Producto de prueba',
+      descripcion: 'Registro de integración',
+      precio: 12.5,
+      stock: 3,
+      categoria: { id: 2, nombre: 'Pruebas' },
+    },
+  ];
+  const productoRepository = {
+    find: jest.fn(),
+  };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    productoRepository.find.mockResolvedValue(productos);
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [ProductosController],
+      providers: [
+        ProductosService,
+        {
+          provide: getRepositoryToken(Producto),
+          useValue: productoRepository,
+        },
+        {
+          provide: CategoriasService,
+          useValue: { findOne: jest.fn() },
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('GET /api/productos conecta el controlador con el servicio', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/api/productos')
       .expect(200)
-      .expect('Hello World!');
+      .expect(productos);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 });
