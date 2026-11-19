@@ -4,6 +4,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CategoriasService } from '../src/categorias/categorias.service';
+import { CategoriasController } from '../src/categorias/categorias.controller';
+import { Categoria } from '../src/categorias/entities/categoria.entity';
 import { Producto } from '../src/productos/entities/producto.entity';
 import { ProductosController } from '../src/productos/productos.controller';
 import { ProductosService } from '../src/productos/productos.service';
@@ -23,20 +25,35 @@ describe('Productos (e2e)', () => {
   const productoRepository = {
     find: jest.fn(),
   };
+  const categorias = [
+    {
+      id: 1,
+      nombre: 'Electrónica',
+      descripcion: 'Productos electrónicos',
+      productos: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+  ];
+  const categoriaRepository = {
+    find: jest.fn(),
+  };
 
   beforeAll(async () => {
     productoRepository.find.mockResolvedValue(productos);
+    categoriaRepository.find.mockResolvedValue(categorias);
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      controllers: [ProductosController],
+      controllers: [ProductosController, CategoriasController],
       providers: [
         ProductosService,
         {
           provide: getRepositoryToken(Producto),
           useValue: productoRepository,
         },
+        CategoriasService,
         {
-          provide: CategoriasService,
-          useValue: { findOne: jest.fn() },
+          provide: getRepositoryToken(Categoria),
+          useValue: categoriaRepository,
         },
       ],
     }).compile();
@@ -51,6 +68,13 @@ describe('Productos (e2e)', () => {
       .get('/api/productos')
       .expect(200)
       .expect(productos);
+  });
+
+  it('GET /api/categorias devuelve las categorías simuladas', () => {
+    return request(app.getHttpServer())
+      .get('/api/categorias')
+      .expect(200)
+      .expect(categorias);
   });
 
   afterAll(async () => {
