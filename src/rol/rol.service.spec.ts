@@ -43,7 +43,7 @@ describe('RolService', () => {
     rolRepository.create.mockReturnValue(dto);
     rolRepository.save.mockResolvedValue(rolGuardado);
 
-    const resultado = await service.create(dto as never);
+    const resultado = await service.create(dto);
 
     expect(queryBuilder.where).toHaveBeenCalledWith('rol.nombre = :nombre', {
       nombre: 'Supervisor',

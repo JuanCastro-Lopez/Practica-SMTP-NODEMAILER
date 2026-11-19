@@ -79,7 +79,7 @@ describe('UsuariosService', () => {
     usuariosRepository.create.mockReturnValue({ ...dto, rol });
     usuariosRepository.save.mockResolvedValue(usuarioGuardado);
 
-    const resultado = await service.create(dto as never);
+    const resultado = await service.create(dto);
 
     expect(rolService.findOne).toHaveBeenCalledWith(2);
     expect(usuariosRepository.save).toHaveBeenCalledTimes(1);
