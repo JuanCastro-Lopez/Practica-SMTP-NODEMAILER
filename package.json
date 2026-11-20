@@ -50,6 +50,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.0",
     "@types/nodemailer": "^8.0.2",
     "@types/passport-jwt": "^4.0.1",
@@ -75,15 +76,20 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": "<rootDir>/tsconfig.spec.json"
+        }
+      ]
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
 }

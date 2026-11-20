@@ -7,12 +7,13 @@ import { RolModule } from './rol/rol.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
-
+import { validateEnv } from './config/env.validation';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: validateEnv,
     }),
     DatabaseModule,
     CategoriasModule,

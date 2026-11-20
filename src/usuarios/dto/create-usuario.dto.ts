@@ -34,8 +34,8 @@ export class CreateUsuarioDto {
   password!: string;
 
   @ApiProperty({
-    description: 'Identificador numérico del rol asignado',
-    example: 1,
+    description: 'Identificador numérico del rol asignado internamente',
+    example: 2,
     type: Number,
   })
   @IsNumber()

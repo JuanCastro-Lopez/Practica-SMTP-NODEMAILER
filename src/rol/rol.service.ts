@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import { Repository } from 'typeorm';
 import { CreateRolDto } from './dto/create-rol.dto';
 import { UpdateRolDto } from './dto/update-rol.dto';
 import { RolEntity } from './entities/rol.entity';
+import { RoleId } from '../auth/authorization/role-id.enum';
 
 @Injectable()
 export class RolService {
@@ -84,6 +86,10 @@ export class RolService {
   }
 
   async remove(id: number): Promise<{ message: string }> {
+    if (id === RoleId.ADMIN) {
+      throw new ForbiddenException('El rol administrador (ID 1) no se puede eliminar.');
+    }
+
     const role = await this.findOne(id);
     await this.rolRepository.remove(role);
 

@@ -4,11 +4,13 @@ import { ProductosService } from './productos.service';
 import { ProductosController } from './productos.controller';
 import { Producto } from './entities/producto.entity';
 import { CategoriasModule } from '../categorias/categorias.module';
+import { AuthorizationModule } from '../auth/authorization/authorization.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Producto]),
     CategoriasModule, // Importamos CategoriasModule para poder inyectar CategoriasService
+    AuthorizationModule,
   ],
   controllers: [ProductosController],
   providers: [ProductosService],

@@ -5,12 +5,12 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
+import { AuthorizationModule } from './authorization/authorization.module';
 
 @Module({
-  imports: [UsuariosModule, MailModule,
+  imports: [UsuariosModule, MailModule, AuthorizationModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     //Configurar JWT Module para nos lea las variables de entorno de forma asincronica
     JwtModule.registerAsync({
@@ -25,7 +25,7 @@ import { MailModule } from 'src/mail/mail.module';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, JwtStrategy],
-  exports: [AuthService, JwtModule, PassportModule, JwtAuthGuard]
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtModule, PassportModule]
 })
 export class AuthModule { }

@@ -9,6 +9,7 @@ import { solicitudOTPDto } from './dto/solicitarOTP.dto';
 import { randomInt } from 'node:crypto';
 import { RestablecerPasswordOtpDto } from './dto/restablecer-password-otp.dto';
 import { LoginOtpDto } from './dto/login-otp.dto';
+import { RoleId } from './authorization/role-id.enum';
 
 const MAX_OTP_ATTEMPTS = 5;
 
@@ -27,6 +28,7 @@ export class AuthService {
         const newUser = await this.usuariosService.create({
             ...registerDto,
             password: hashedPassword,
+            rolId: RoleId.CLIENT,
         })
 
         return {
