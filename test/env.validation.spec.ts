@@ -56,4 +56,16 @@ describe('validateEnv', () => {
       ),
     ).toThrow('La simulación SMTP solo está permitida en desarrollo.');
   });
+
+  it('rechaza variables obligatorias ausentes y formatos de configuración inválidos', () => {
+    const missingDbName = createValidEnv();
+    delete (missingDbName as Partial<typeof missingDbName>).DB_NAME;
+
+    expect(() => validateEnv(missingDbName)).toThrow(
+      'La variable DB_NAME es obligatoria.',
+    );
+    expect(() =>
+      validateEnv(createValidEnv({ MAIL_FROM: 'correo-invalido' })),
+    ).toThrow('MAIL_FROM debe ser un correo válido.');
+  });
 });
