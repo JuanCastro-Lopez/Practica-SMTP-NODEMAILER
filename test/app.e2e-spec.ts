@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CategoriasService } from '../src/categorias/categorias.service';
 import { CategoriasController } from '../src/categorias/categorias.controller';
@@ -65,9 +64,7 @@ describe('Productos (e2e)', () => {
   });
 
   it('returns 404 for an unknown route', () => {
-    return request(app.getHttpServer())
-      .get('/unknown')
-      .expect(404);
+    return request(app.getHttpServer()).get('/unknown').expect(404);
   });
 
   it('GET /api/productos conecta el controlador con el servicio', () => {

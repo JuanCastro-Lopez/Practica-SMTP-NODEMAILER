@@ -43,9 +43,7 @@ describe('validateEnv', () => {
     ).toThrow('JWT_SECRET debe tener al menos 32 caracteres.');
 
     expect(() =>
-      validateEnv(
-        createValidEnv({ NODE_ENV: 'production', DB_SYNC: 'true' }),
-      ),
+      validateEnv(createValidEnv({ NODE_ENV: 'production', DB_SYNC: 'true' })),
     ).toThrow('DB_SYNC y DB_LOGGING deben estar desactivados en producción.');
 
     expect(() => validateEnv(createValidEnv({ MAIL_MODE: 'invalid' }))).toThrow(

@@ -7,7 +7,7 @@ jest.mock(
 );
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { ExecutionContext, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -48,8 +48,11 @@ describe('Roles (e2e)', () => {
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        canActivate: (context) => {
-          context.switchToHttp().getRequest().user = {
+        canActivate: (context: ExecutionContext): boolean => {
+          const httpRequest = context.switchToHttp().getRequest<{
+            user?: { rolId: RoleId };
+          }>();
+          httpRequest.user = {
             rolId: RoleId.ADMIN,
           };
           return true;

@@ -7,7 +7,7 @@ import { RolesGuard } from './roles.guard';
 
 class AdminOnlyHandler {
   @Roles(RoleId.ADMIN)
-  handle() {}
+  handle(this: void) {}
 }
 
 describe('RolesGuard', () => {
