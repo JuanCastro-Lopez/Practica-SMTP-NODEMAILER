@@ -1,9 +1,19 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
@@ -98,13 +108,17 @@ export class AuthController {
     return this.authService.loginConOtp(loginOtpDto);
   }
 
-    //auth/perfil
-    @Get('perfil')
-    @UseGuards(JwtAuthGuard)
-    getPerfil(@GetUser() usuario: UsuarioEntity) {
-        return {
-            message: 'Perfil del usuario autenticado con exito',
-            user: usuario
-        }
-    }
+  @Get('perfil')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consultar el perfil del usuario autenticado' })
+  @ApiOkResponse({ description: 'Perfil del usuario autenticado.' })
+  @ApiUnauthorizedResponse({ description: 'Falta un JWT válido.' })
+  @ApiForbiddenResponse({ description: 'La cuenta no tiene acceso al recurso.' })
+  getPerfil(@GetUser() usuario: UsuarioEntity) {
+    return {
+      message: 'Perfil del usuario autenticado con exito',
+      user: usuario,
+    };
+  }
 }

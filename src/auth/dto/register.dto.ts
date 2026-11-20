@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -33,12 +32,4 @@ export class RegisterDto {
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   @IsString({ message: 'La contraseña debe ser un texto' })
   password!: string;
-
-  @ApiProperty({
-    description: 'Identificador numérico del rol asignado',
-    example: 1,
-    type: Number,
-  })
-  @IsNumber({}, { message: 'El rolId debe ser un número' })
-  rolId!: number;
 }

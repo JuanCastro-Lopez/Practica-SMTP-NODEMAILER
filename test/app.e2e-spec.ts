@@ -63,6 +63,10 @@ describe('Productos (e2e)', () => {
     await app.init();
   });
 
+  it('returns 404 for an unknown route', () => {
+    return request(app.getHttpServer()).get('/unknown').expect(404);
+  });
+
   it('GET /api/productos conecta el controlador con el servicio', () => {
     return request(app.getHttpServer())
       .get('/api/productos')
