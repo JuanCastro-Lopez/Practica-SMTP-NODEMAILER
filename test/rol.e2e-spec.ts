@@ -14,6 +14,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { RolEntity } from '../src/rol/entities/rol.entity';
 import { RolController } from '../src/rol/rol.controller';
 import { RolService } from '../src/rol/rol.service';
+import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
+import { RoleId } from '../src/auth/authorization/role-id.enum';
 
 describe('Roles (e2e)', () => {
   let app: INestApplication<App>;
@@ -43,7 +45,17 @@ describe('Roles (e2e)', () => {
           useValue: rolRepository,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (context) => {
+          context.switchToHttp().getRequest().user = {
+            rolId: RoleId.ADMIN,
+          };
+          return true;
+        },
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
