@@ -94,4 +94,24 @@ describe('UsuariosService', () => {
     });
     expect(resultado.user).not.toHaveProperty('password');
   });
+
+  it('rechaza la creación cuando el rol asignado no existe sin guardar', async () => {
+    const dto = {
+      nombre: 'Jairo Trejos',
+      email: 'nuevo@example.com',
+      password: 'Password123',
+      rolId: 99,
+    };
+
+    usuariosRepository.findOne.mockResolvedValue(null);
+    rolService.findOne.mockResolvedValue(null);
+
+    await expect(service.create(dto)).rejects.toThrow(
+      'El rol con ID 99 no existe',
+    );
+
+    expect(rolService.findOne).toHaveBeenCalledWith(99);
+    expect(usuariosRepository.create).not.toHaveBeenCalled();
+    expect(usuariosRepository.save).not.toHaveBeenCalled();
+  });
 });

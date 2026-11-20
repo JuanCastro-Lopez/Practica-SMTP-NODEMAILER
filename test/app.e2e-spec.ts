@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import {
+  ExecutionContext,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,6 +13,8 @@ import { Categoria } from '../src/categorias/entities/categoria.entity';
 import { Producto } from '../src/productos/entities/producto.entity';
 import { ProductosController } from '../src/productos/productos.controller';
 import { ProductosService } from '../src/productos/productos.service';
+import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
+import { RoleId } from '../src/auth/authorization/role-id.enum';
 
 describe('Productos (e2e)', () => {
   let app: INestApplication<App>;
@@ -56,9 +62,27 @@ describe('Productos (e2e)', () => {
           useValue: categoriaRepository,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext): boolean => {
+          const httpRequest = context.switchToHttp().getRequest<{
+            user?: { rolId: RoleId };
+          }>();
+          httpRequest.user = { rolId: RoleId.ADMIN };
+          return true;
+        },
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     app.setGlobalPrefix('api');
     await app.init();
   });
@@ -72,6 +96,13 @@ describe('Productos (e2e)', () => {
       .get('/api/productos')
       .expect(200)
       .expect(productos);
+  });
+
+  it('POST /api/productos devuelve 400 cuando el cuerpo no cumple el DTO', () => {
+    return request(app.getHttpServer())
+      .post('/api/productos')
+      .send({ nombre: '', precio: -1, categoriaId: 'inválido' })
+      .expect(400);
   });
 
   it('GET /api/categorias devuelve las categorías simuladas', () => {
