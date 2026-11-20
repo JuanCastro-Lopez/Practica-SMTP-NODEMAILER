@@ -68,7 +68,8 @@ describe('Productos (e2e)', () => {
     return request(app.getHttpServer())
       .get('/unknown')
       .expect(404);
-    
+  });
+
   it('GET /api/productos conecta el controlador con el servicio', () => {
     return request(app.getHttpServer())
       .get('/api/productos')
